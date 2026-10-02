@@ -74,6 +74,7 @@
   .who .ok { color: var(--sarcelle); font-weight: 800; }
   .who button { border: none; background: transparent; color: var(--text3); font: inherit; font-weight: 700; font-size: 12px; cursor: pointer; }
   .tile.busy { opacity: .6; pointer-events: none; }
+  body.locked main, body.locked #install { display: none; }
   footer a { color: inherit; }
 </style>
 </head>
@@ -120,7 +121,7 @@
   <footer>Etulia v<span id="ver"></span> · <a href="https://techzone.etulia.fr/" rel="noopener">Tech Zone</a></footer>
 
 <script>
-  const APP_VERSION = '2.0';
+  const APP_VERSION = '2.1';
   document.getElementById('ver').textContent = APP_VERSION;
 
   // ── Installation (bandeau masqué une fois installé ou « Plus tard » 30 jours) ──
@@ -149,26 +150,50 @@
   };
   window.addEventListener('appinstalled', () => box.classList.remove('show'));
 
-  // ── Connexion unique (v2) ──────────────────────────────────────────────
-  // Un seul login ici ; chaque tuile demande à l'Edge Function sso-handoff un
-  // jeton de passage à usage unique et ouvre l'app avec #sso=… ; l'app
-  // l'échange contre sa propre session. Sans connexion, les tuiles restent
-  // de simples liens (chaque app garde son écran de connexion).
+  // ── Connexion unique (v2.1) ────────────────────────────────────────────
+  // Un seul login ici. Le portail garde UN jeton de passage prêt à l'avance
+  // (Edge Function sso-handoff, lien magique à usage unique) : au toucher, la
+  // tuile l'ajoute à son lien (#sso=…) et s'ouvre aussitôt — synchrone, donc
+  // iOS accepte l'ouverture dans Safari (nouvel onglet) depuis le portail
+  // installé, sans le navigateur intégré à gros bandeau. L'app échange le
+  // jeton contre sa propre session. Un nouveau jeton est préparé après chaque
+  // usage et renouvelé toutes les 40 min. Tuiles masquées tant qu'on n'est pas
+  // connecté (sauf si Supabase ne charge pas : liens simples).
   const SUPABASE_URL = 'https://qczdkpigbngksztjezbm.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_fGScTPMheymoIscX4GIc_g_uKVZGVzV';
   const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
   const authBox = document.getElementById('auth');
-  let session = null;
+  let session = null, ssoToken = null, ssoAt = 0, prefetching = null;
+  const TOKEN_TTL = 40 * 60e3;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  async function prefetchToken() {
+    if (!sb || !session) { ssoToken = null; return null; }
+    if (prefetching) return prefetching;
+    prefetching = (async () => {
+      try {
+        const { data, error } = await sb.functions.invoke('sso-handoff', { body: {} });
+        if (error || !data || !data.token_hash) throw error || new Error('pas de jeton');
+        ssoToken = data.token_hash; ssoAt = Date.now();
+      } catch (e) { console.warn('[sso] prefetch', e); ssoToken = null; }
+      finally { prefetching = null; }
+      return ssoToken;
+    })();
+    return prefetching;
+  }
+  function freshToken() { return ssoToken && (Date.now() - ssoAt) < TOKEN_TTL ? ssoToken : null; }
   function renderAuth() {
-    if (!sb) { authBox.innerHTML = ''; return; }
+    if (!sb) { authBox.innerHTML = ''; document.body.classList.remove('locked'); return; }
     if (session) {
+      document.body.classList.remove('locked');
       const name = (session.user.user_metadata && session.user.user_metadata.name) || session.user.email;
-      authBox.innerHTML = `<div class="who"><span><span class="ok">●</span> Connecté : <b>${esc(name)}</b> — les applications s'ouvrent sans mot de passe</span><button id="logout">Déconnexion</button></div>`;
-      document.getElementById('logout').onclick = () => sb.auth.signOut();
+      authBox.innerHTML = `<div class="who"><span><span class="ok">●</span> Connecté : <b>${esc(name)}</b></span><button id="logout">Déconnexion</button></div>`;
+      document.getElementById('logout').onclick = () => { ssoToken = null; sb.auth.signOut(); };
+      if (!freshToken()) prefetchToken();
       return;
     }
+    document.body.classList.add('locked');
     authBox.innerHTML = `<form class="auth-card" id="login">
-      <h2>Connexion unique</h2><p>Connecte-toi une fois ici : les applications s'ouvriront déjà connectées.</p>
+      <h2>Connexion</h2><p>Connecte-toi une fois : les applications s'ouvriront déjà connectées.</p>
       <label>E-mail</label><input type="email" id="lg-email" autocomplete="username" required>
       <label>Mot de passe</label><input type="password" id="lg-pw" autocomplete="current-password" required>
       <button class="btn" type="submit">Se connecter</button><div class="err" id="lg-err"></div></form>`;
@@ -178,22 +203,28 @@
       btn.disabled = false; if (error) document.getElementById('lg-err').textContent = 'Connexion refusée : ' + error.message;
     };
   }
-  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   document.querySelectorAll('.tile').forEach((t) => {
+    const base = t.href;
     t.addEventListener('click', async (e) => {
-      if (!sb || !session) return;                       // lien normal
-      e.preventDefault(); t.classList.add('busy');
-      try {
-        const { data, error } = await sb.functions.invoke('sso-handoff', { body: { target: t.href } });
-        if (error || !data || !data.url) throw error || new Error('pas de jeton');
-        window.location.href = data.url;
-      } catch (err) {
-        console.warn('[sso]', err); t.classList.remove('busy');
-        window.location.href = t.href;                   // repli : l'app demandera le mot de passe
+      if (!sb || !session) { t.href = base; return; }           // lien normal
+      const tok = freshToken();
+      if (tok) {
+        // Synchrone : le lien part avec le jeton, dans Safari si portail installé
+        t.href = base + '#sso=' + encodeURIComponent(tok);
+        t.target = standalone ? '_blank' : '_self';
+        ssoToken = null; setTimeout(() => { t.href = base; prefetchToken(); }, 1500);
+        return;
       }
+      e.preventDefault(); t.classList.add('busy');
+      const tok2 = await prefetchToken(); t.classList.remove('busy');
+      ssoToken = null; setTimeout(prefetchToken, 1500);
+      window.location.href = tok2 ? base + '#sso=' + encodeURIComponent(tok2) : base;
     });
   });
+  window.addEventListener('pageshow', () => { if (session && !freshToken()) prefetchToken(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && session && !freshToken()) prefetchToken(); });
   if (sb) {
+    document.body.classList.add('locked');
     sb.auth.getSession().then(({ data }) => { session = data.session; renderAuth(); });
     sb.auth.onAuthStateChange((ev, s) => { session = s; if (ev !== 'TOKEN_REFRESHED') renderAuth(); });
   }

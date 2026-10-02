@@ -1,7 +1,7 @@
 // Etulia — portail faron.etulia.fr. Cache minimal : la page, les images et les
 // icônes, pour que le portail s'ouvre même sans réseau. À chaque modification
 // visible, bumper CACHE_NAME (sinon l'ancienne version reste en cache).
-const CACHE_NAME = 'etulia-portail-v3';
+const CACHE_NAME = 'etulia-portail-v4';
 const ASSETS = ['./', './index.html', './manifest.json',
   './img/logo-nom.png', './img/crm.png', './img/chantiers.png', './img/metre.png', './img/photos.png',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon.png'];
