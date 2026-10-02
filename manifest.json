@@ -1,0 +1,26 @@
+{
+  "name": "Etulia",
+  "short_name": "Etulia",
+  "description": "Portail des applications Etulia (Faron Fenêtres) : CRM, Chantiers, Métré, Photos.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#F7F6F3",
+  "theme_color": "#0072BA",
+  "lang": "fr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Etulia CRM", "url": "https://app.etulia.fr/", "icons": [{ "src": "img/crm.png", "sizes": "256x256" }] },
+    { "name": "Etulia Chantiers", "url": "https://chantiers.etulia.fr/", "icons": [{ "src": "img/chantiers.png", "sizes": "256x256" }] },
+    { "name": "Etulia Métré", "url": "https://metre.etulia.fr/", "icons": [{ "src": "img/metre.png", "sizes": "256x256" }] }
+  ]
+}

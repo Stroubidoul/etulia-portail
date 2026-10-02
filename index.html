@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Etulia — Faron Fenêtres</title>
+<meta name="description" content="Portail des applications Etulia : CRM, Chantiers, Métré, Photos.">
+<meta name="theme-color" content="#0072BA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Etulia">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bleu: #0072BA; --aubergine: #434457; --sarcelle: #37A7A6; --grenadine: #EA565A; --ocre: #D6A900;
+    --bg: #F7F6F3; --surface: #FFFFFF; --surface2: #F0EEE9; --border: #E3E0D8;
+    --text: #1F1F2A; --text2: #4B4B5A; --text3: #8A8A98; --radius: 18px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text);
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header { width: 100%; max-width: 560px; text-align: center; padding: 18px 0 10px; }
+  header img { width: min(260px, 70vw); height: auto; display: block; margin: 0 auto 10px; }
+  header .sub { font-size: 13px; color: var(--text3); font-weight: 500; }
+  main { width: 100%; max-width: 560px; display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 14px; }
+  @media (min-width: 640px) { main { grid-template-columns: 1fr 1fr; } }
+  .tile {
+    display: flex; align-items: center; gap: 16px; padding: 18px 18px; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); text-decoration: none; color: inherit; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease; min-height: 104px; position: relative;
+  }
+  .tile:active { transform: scale(.985); }
+  .tile:hover { border-color: var(--bleu); box-shadow: 0 6px 18px rgba(0,114,186,.12); }
+  .tile img { width: 68px; height: 68px; border-radius: 16px; object-fit: contain; background: var(--surface2); flex-shrink: 0; padding: 6px; }
+  .tile .t { flex: 1; min-width: 0; }
+  .tile .name { font-size: 18px; font-weight: 800; letter-spacing: -.01em; color: var(--text); }
+  .tile .desc { font-size: 13px; color: var(--text3); font-weight: 500; margin-top: 3px; line-height: 1.35; }
+  .tile .arrow { color: var(--text3); font-size: 20px; flex-shrink: 0; }
+  .tile.crm img { background: #fff; }
+  .tile.chantiers { border-left: 5px solid var(--sarcelle); }
+  .tile.crm { border-left: 5px solid var(--bleu); }
+  .tile.metre { border-left: 5px solid var(--ocre); }
+  .tile.photos { border-left: 5px solid var(--aubergine); }
+  .tile .badge { position: absolute; top: 10px; right: 12px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; background: #FEF3C7; color: #92400E; }
+  /* Bandeau d'installation */
+  #install { display: none; width: 100%; max-width: 560px; margin-top: 18px; background: var(--surface); border: 1.5px dashed var(--bleu); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; color: var(--text2); line-height: 1.5; }
+  #install.show { display: block; }
+  #install b { color: var(--text); }
+  #install .row { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 8px; }
+  .btn { border: none; background: var(--bleu); color: #fff; font: inherit; font-weight: 700; font-size: 14px; padding: 10px 16px; border-radius: 12px; cursor: pointer; }
+  .btn.ghost { background: transparent; color: var(--text3); font-weight: 600; padding: 8px 10px; }
+  footer { margin-top: auto; padding-top: 28px; font-size: 11px; color: var(--text3); text-align: center; font-weight: 500; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+  <header>
+    <img src="img/logo-nom.png" alt="Etulia" width="600" height="127">
+    <div class="sub">Faron Fenêtres · Faron Habitat — vos applications</div>
+  </header>
+
+  <main>
+    <a class="tile crm" href="https://app.etulia.fr/" rel="noopener">
+      <img src="img/crm.png" alt="">
+      <div class="t"><div class="name">Etulia</div><div class="desc">CRM — contacts, ventes, planning, SAV</div></div>
+      <span class="arrow">›</span>
+    </a>
+    <a class="tile chantiers" href="https://chantiers.etulia.fr/" rel="noopener">
+      <img src="img/chantiers.png" alt="">
+      <div class="t"><div class="name">Etulia Chantiers</div><div class="desc">Suivi des chantiers sur le terrain</div></div>
+      <span class="arrow">›</span>
+    </a>
+    <a class="tile metre" href="https://metre.etulia.fr/" rel="noopener">
+      <img src="img/metre.png" alt="">
+      <div class="t"><div class="name">Etulia Métré</div><div class="desc">Métré numérique sur chantier</div></div>
+      <span class="arrow">›</span>
+    </a>
+    <a class="tile photos" href="https://photos.etulia.fr/" rel="noopener">
+      <img src="img/photos.png" alt="">
+      <div class="t"><div class="name">Etulia Photos</div><div class="desc">Albums produits et réalisations</div></div>
+      <span class="badge">bientôt</span>
+      <span class="arrow">›</span>
+    </a>
+  </main>
+
+  <div id="install">
+    <div id="install-ios"><b>Installer sur l'iPhone :</b> touche le bouton Partager <svg width="14" height="16" viewBox="0 0 14 16" style="vertical-align:-2px" aria-hidden="true"><path d="M7 1l3 3h-2v6H6V4H4l3-3z" fill="#0072BA"/><path d="M2 7h2v1.5H3.5v6h7v-6H9V7h2.5v8.5h-10V7z" fill="#0072BA"/></svg> de Safari puis « Sur l'écran d'accueil ».</div>
+    <div id="install-android"><b>Installer sur le téléphone :</b> ajoute Etulia à l'écran d'accueil pour retrouver toutes les applications d'un geste.</div>
+    <div class="row">
+      <button class="btn" id="install-btn" style="display:none">Installer</button>
+      <button class="btn ghost" id="install-later">Plus tard</button>
+    </div>
+  </div>
+
+  <footer>Etulia v<span id="ver"></span> · <a href="https://techzone.etulia.fr/" rel="noopener">Tech Zone</a></footer>
+
+<script>
+  const APP_VERSION = '1.0';
+  document.getElementById('ver').textContent = APP_VERSION;
+
+  // ── Installation (bandeau masqué une fois installé ou « Plus tard » 30 jours) ──
+  const ua = navigator.userAgent || '';
+  const isIOS = /iP(hone|ad|od)/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const box = document.getElementById('install');
+  let later = 0; try { later = Number(localStorage.getItem('etulia-portail-install-later') || 0); } catch (_) {}
+  const snoozed = later && (Date.now() - later) < 30 * 86400e3;
+  document.getElementById('install-ios').style.display = isIOS ? '' : 'none';
+  document.getElementById('install-android').style.display = isIOS ? 'none' : '';
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); deferredPrompt = e;
+    document.getElementById('install-btn').style.display = '';
+    if (!standalone && !snoozed) box.classList.add('show');
+  });
+  if (isIOS && !standalone && !snoozed) box.classList.add('show');
+  document.getElementById('install-btn').onclick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; box.classList.remove('show');
+  };
+  document.getElementById('install-later').onclick = () => {
+    try { localStorage.setItem('etulia-portail-install-later', String(Date.now())); } catch (_) {}
+    box.classList.remove('show');
+  };
+  window.addEventListener('appinstalled', () => box.classList.remove('show'));
+
+  // ── Service worker (icônes + page hors ligne) ──
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('service-worker.js').catch(() => {}); });
+  }
+</script>
+</body>
+</html>
